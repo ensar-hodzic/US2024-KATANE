@@ -87,7 +87,7 @@ class Morse:
 			return 0.5
 
 	def _check(self, t):
-		good = False
+		good = True
 		eps = 1e-5
 		for i in range(len(self.buffer)):
 			good &= abs(self.buffer[i] - self.target[i]) < eps
