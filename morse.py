@@ -24,7 +24,7 @@ class Morse:
 		self.solved = False
 		self.led = Pin(pins[0], Pin.OUT)
 		self.analog = ADC(Pin(pins[1], Pin.IN))
-		self.signal = signal
+
 		self.led_array = _convert(upper(word))
 		self.curr = 0		
 		self.timer = Timer(period=T, mode=Timer.PERIODIC, callback=self._morse)
