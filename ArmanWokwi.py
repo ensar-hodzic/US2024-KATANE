@@ -1,7 +1,7 @@
 from machine import ADC,Pin,Timer 
 from utime import sleep
 import random
-
+import time
 buttons =[Pin(0, Pin.IN),Pin(1, Pin.IN),Pin(2, Pin.IN),Pin(3, Pin.IN)]
 
 gameStart=False ##SLUZI KO DEBOUNCER I ZNAMO KAD JE UPALJENA NEKA IGRA
@@ -150,7 +150,7 @@ timerMat=Timer(-1)  #TIMER ZA POTENCIOMETAR GAME
 timerMat.deinit()
 korisnikSifra=[0,0,0,0]
 brojevi=[0,0,2,0] #Koliko vremena im daješ
-
+debounce=0
 
 def generisiSifruMatricna():
     global sifraMatricna
@@ -158,7 +158,9 @@ def generisiSifruMatricna():
         sifraMatricna[i]=random.randrange(0,9)
 
 def postaviSifru(irq):
-    global sifraMatricna,izlazMatricna,ulazMatricna,korisnikSifra,brojacMatricna,gameStart
+    global sifraMatricna,izlazMatricna,ulazMatricna,korisnikSifra,brojacMatricna,gameStart,debounce
+    if time.ticks_ms()-debounce<400:
+        return
     for i in range(4):
         izlazMatricna[i].value(1)
         for j in range(4):
@@ -166,8 +168,8 @@ def postaviSifru(irq):
                 izlazMatricna[i].value(0)
                 korisnikSifra[brojacMatricna] = cifra[i][j] 
                 brojacMatricna+=1
-                print(cifra[i][j])
-                sleep(0.2)          ##Sleep da ima mala pauza izmedju unosa da ne mozemo drzati na matricnoj
+                debounce=time.ticks_ms()
+                print(cifra[i][j])         
         izlazMatricna[i].value(0)
     if sifraMatricna==korisnikSifra and brojacMatricna==4:
         TimerOff()
@@ -175,6 +177,7 @@ def postaviSifru(irq):
         timerMat.deinit()
         korisnikSifra=[0,0,0,0]
         brojacMatricna=0
+        debounce=0
         gameStart=False
         return
     if brojacMatricna==4:
@@ -206,7 +209,9 @@ def generisiPut():
         labirintPut[i]=random.choice([2,4,6,8])
 
 def Labirint(tim):
-    global labirintPut,brojacLabirint,gameStart
+    global labirintPut,brojacLabirint,gameStart,debounce
+    if time.ticks_ms()-debounce<400:
+        return
     for i in range(4):
         izlazMatricna[i].value(1)
         for j in range(4):
@@ -222,8 +227,9 @@ def Labirint(tim):
                     brojacLabirint=0
                     TimerOff()
                     timerMat.deinit()
+                    debounce=0
                     gameStart=False
-                sleep(0.2)       ##Sleep da ima mala pauza izmedju unosa da ne mozemo drzati na matricnoj
+                debounce=time.ticks_ms()
         izlazMatricna[i].value(0)
 
 def StartLabirintGame(irq):
