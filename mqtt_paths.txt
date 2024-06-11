@@ -1,0 +1,6 @@
+katane/game_start 						# ovjde se salje b'1' ako je igra pocela
+katane/main_inbox/modul_solved_count 	# ovjde slave daje broj modula koje je utvrdio da je rijeseno npr b'2'
+katane/main_inbox/strike 				# ovdje slave daje broj gresaka npr. b'2' sto je on izmjerio
+katane/game_over						# ako je b'lose' izgubili smo ako je b'win' pobjeda
+
+katane/labirint/path					# prikaz generisanog puta za labirint
