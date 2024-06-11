@@ -5,7 +5,7 @@ from umqtt.robust import MQTTClient
 import ujson
 from labirint import *
 from decode import *
-from simon_says import * # NE POSTOJI TRENUTNO JEL!!!!!
+from simonsays import * # NE POSTOJI TRENUTNO JEL!!!!!
 
 
 class MainKatane:
@@ -50,14 +50,14 @@ class MainKatane:
 			self.mqtt.publish(b'katane/game_over', b'win')
 
 		if self.strikes < 0:
-			self.explode(t)
+			self.explode
 
 
 	def run(self):
 		# okini module
 		self.moduli = [Labirint(self.labirint_pins), 
 			DecodeModul(self.display_pins, self.rotacioni_pins), #BANDA NAPRAVI OVO DA ZNM STA COVJEKU SLAT
-			SimonSays(self.simons_word , self.simon_led_pins, self.simon_button_pins)]
+			SimonSays( self.simon_button_pins, self.simon_led_pins,  self.simons_word)]
 
 		self.publish_labirint_path()
 
@@ -65,22 +65,22 @@ class MainKatane:
 		self.countdown.init(mode=Timer.ONE_SHOT, callback=self.explode)
 
 	def subscription(self, topic, msg):
-		if topic == b'katane/main_inbox/modul_solved':
+		if topic == b'katane/main_inbox/modul_solved_count': 
 			self.solved_count_slave = int(msg)
-		if topic == b'katane/game_)start' and msg == b'1':
+		if topic == b'katane/game_start' and msg == b'1':
 			self.run()
-		if topic == b'katane/strike':
+		if topic == b'katane/main_inbox/strike' and msg == b'1': # ovo koristim za broj greski
 			self.strikes -= 1
 
 
 	def explode(self, t):
-		self.mqtt.publish(b'katane/main_inbox/game_over', b'lose')
+		self.mqtt.publish(b'katane/game_over', b'lose')
 		self.main_timer.deinit() 
 
 	def publish_labirint_path(self):
 		l = self.moduli[0].get_path()
 		json_str = json.dumps(l)
-		self.mqtt.publish(b'katane/main_inbox/labirint_path', json_str.encode('ascii'))
+		self.mqtt.publish(b'katane/labirint/path', json_str.encode('ascii'))
 
 
 	@staticmethod
