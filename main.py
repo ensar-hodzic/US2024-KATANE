@@ -49,6 +49,9 @@ class MainKatane:
 			self.main_timer.deinit()
 			self.mqtt.publish(b'katane/game_over', b'win')
 
+		if self.strikes < 0:
+			self.explode(t)
+
 
 	def run(self):
 		# okini module
@@ -66,6 +69,8 @@ class MainKatane:
 			self.solved_count_slave = int(msg)
 		if topic == b'katane/game_)start' and msg == b'1':
 			self.run()
+		if topic == b'katane/strike':
+			self.strikes -= 1
 
 
 	def explode(self, t):
