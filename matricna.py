@@ -58,7 +58,7 @@ class MatricnaGame:
         self.generisiSifruMatricna()
 
         self.timerMat=Timer(-1)  #TIMER ZA POTENCIOMETAR GAME
-        self.timerMat.init(mode=Timer.PERIODIC, period=self.T, callback=postaviSifru) ##Igrati se sa period
+        self.timerMat.init(mode=Timer.PERIODIC, period=self.T, callback=self.postaviSifru) ##Igrati se sa period
 
     def solved(self):
         return self.solved
