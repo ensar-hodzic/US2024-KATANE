@@ -28,10 +28,10 @@ class Morse:
 		self.led_array = self._convert(word.upper())
 		self.curr = 0		
 
-		self.target = self.target(duty)
+		self.target = self.target(duty) * 3
 		# uzorkuj signal na frequency*10 kad je dobar modul je rijesen
 		rate = int(1 / (10 * frequency) * 1000)
-		self.buffer = [0] * 10
+		self.buffer = [0] * 30
 		
 		self.timer = Timer(-1)
 		self.sampler = Timer(-1)
