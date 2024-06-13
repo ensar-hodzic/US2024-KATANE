@@ -28,7 +28,7 @@ main_timer = Timer(-1)
 game_running = False
 #___________________________________Pomocne funkcije____________________________________________#
 def subscribe(topic, msg):
-	global
+	global slave_present, app_present, game_running, game_start, strike_slave, solved_slave
 	if topic == b'katane/slave_present' and msg == b'1':
 		slave_present = True
 	if topic == b'katane/app_present' and msg == b'1':
@@ -39,7 +39,7 @@ def subscribe(topic, msg):
 	if topic == b'katane/slave_solved':
 		solved_slave += int(msg)
 	if topic == b'katane/slave_strike':
-		strike_slave += int(msg)
+		strike_slave = int(msg)
 
 
 def rgb_randomiser():

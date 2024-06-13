@@ -5,5 +5,5 @@ katane/game_start			# ovdje telefon salje b'1' da igra pocne
 katane/game_over			# ovdje main pico kaze b'win' ili b'lose' u ovisnosti da li bomba explodira
 katane/game_state			# ovdje main stavi json { "state": state, "max_strike": max_strike } sto je rgb stanje i broj dozvoljenih gresaka
 katane/slave_solved			# kada se neki modul zavrsi slave ovdje obavjestava tako sto doda b'1'
-katane/slave_strike			# kada se desi greska na slaveu ovdje salje obavijest
+katane/slave_strike			# ovdje slave postavlja koliko je greski UKUPNO zabiljezio
 
