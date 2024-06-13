@@ -5,94 +5,115 @@ from umqtt.robust import MQTTClient
 import ujson
 from labirint import *
 from decode import *
-from simonsays import * # NE POSTOJI TRENUTNO JEL!!!!!
+
+# Raspberry master
+
+# spoji se na internet
+import network
+import time
+from machine import Pin
+from umqtt.robust import MQTTClient
+import ujson
 
 
-class MainKatane:
-	labirint_pins = [] # lista pinova za labirint
-	display_pins = [] # lista pinova za display decode modula
-	rotacioni_pins = [] # lista pinova za rotacioni enkoder decode modula
-	simon_led_pins = [] # lista pinova za 3 ledice simon says modula
-	simon_button_pins = [] # lista pinova za 3 tastera simon says modula
-
-	rgb_pins = [] #pinovi rgba
-
-	def __init__(self, state, mqtt_conn):
-		self.mqtt = mqtt_conn
-		self.mqtt = MQTTClient(clientid='master', server='broker.hivemq.com', user='', password='', port=1883)
-		self.mqtt.set_callback(self.subscription)
-		self.mqtt.connect()
-
-
-		moduli=[b"katane/morse", b"katane/simon_says", b"katane/button_press", b"katane/wires", b"katane/password"]# lista modula na slaveu
-		mqtt_conn.subscribe(moduli)
-		self.countdown = Timer(-1)
-		self.main_timer = Timer(-1)
-
-		self.strikes = state % 4 # dozvoljene greske
-		self.simons_word = self.generate_simon_word(state)
-
-		self.display_rgb_state(state)
-
-		self.solved_count_local = 0 # koliko je main izbrojao 
-		self.solved_count_slave = 0 # koliko je slave izbrojao
+#___________________________________Glob varijable______________________________________________#
+slave_present = False
+app_present = False
+game_start = False
+solved = 0 	
+strike = 0
+solved_slave = 0
+strike_slave = 0
+main_timer = Timer(-1)
+game_running = False
+#___________________________________Pomocne funkcije____________________________________________#
+def subscribe(topic, msg):
+	global
+	if topic == b'katane/slave_present' and msg == b'1':
+		slave_present = True
+	if topic == b'katane/app_present' and msg == b'1':
+		app_present = True
+	if topic == b'katane/game_start' and msg == b'1':
+		game_running = True
+		game_start = True
+	if topic == b'katane/slave_solved':
+		solved_slave += int(msg)
+	if topic == b'katane/slave_strike':
+		strike_slave += int(msg)
 
 
-	def main(self, t):
-		self.solved_count_local = 0
-		for modul in moduli:
-			self.solved_count_local += modul.solved
+def rgb_randomiser():
+	return random.randint(0, 7), random.randint(0,3)
 
-		if self.solved_count_slave + self.solved_count_local == 7:
-			# igra rjesena
-			self.countdown.deinit() # prestani countdown
-			self.main_timer.deinit()
-			self.mqtt.publish(b'katane/game_over', b'win')
+def explode(t):
+	global game_running
+	mqtt_conn.publish(b'katane/game_over', b'lose')
+	main_timer.deinit()
+	game_running = False
 
-		if self.strikes < 0:
-			self.explode
+def check(t):
+	global solved, strike, game_running
+	solved = 0
+	for m in moduli:
+		solved += m.solved
+		strike += m.get_strikes() 
+	if strike + strike_slave > max_strike:
+		explode(t)
+	elif solved + solved_slave == 7:
+		count_down.deinit()
+		mqtt_conn.publish(b'katane/game_over', b'win')
+		main_timer.deinit()
+		print('ggwp')
+		game_running = False
+
+def publish_state():
+	json = '{ "state": ' + str(state) + ',"max_strike": ' + str(max_strike) + ' }'
+	mqtt_conn.publish(b'katane/game_state', json.encode('ascii'))
+
+#___________________________________Spajanje na Wifi____________________________________________#
+
+network_name = 'Wifi'
+network_password = 'password'
+
+nic = network.WLAN(network.STA_IF)
+nic.activate(True)
+nic.connect(network_name, network_password)
+
+while not nic.isconnected():
+    print('Cekam vezu')
+    time.sleep(1)
+
+#___________________________________Game setup____________________________________________#
+
+mqtt_conn = MQTTClient(client_id='masterpico', server='broker.hivemq.com',user='',password='',port=1883)
+mqtt_conn.set_callback(subscribe)
+mqtt_conn.connect()
+mqtt_conn.subscribe(b"katane/#")
+
+while not slave_present:
+	print('cekam slave da se javi')
+	mqtt_conn.wait_msg()
+while not app_present:
+	print('cekam aplikaciju sa telefona da se javi')
+	mqtt_conn.wait_msg()
+
+mqtt_conn.publish(b'katane/main_ready', b'1') # javi telefonu da je main spreman da pocne
+
+while not game_start:
+	mqtt_conn.wait_msg()
+
+#____________________________________Game Run_______________________________________#
+
+state, max_strike = rgb_randomiser()
+
+publish_state()
+
+count_down = Timer(period=3 * 1000 * 60, mode=Timer.ONE_SHOT, callback=explode)
+
+moduli = [Labirint(state, labirint_pins), DecodeModul(state, display_pins, encoder_pins)]
+main_timer.init(period=100, mode=Timer.PERIODIC, callback=check)
 
 
-	def run(self):
-		# okini module
-		self.moduli = [Labirint(self.labirint_pins), 
-			DecodeModul(self.display_pins, self.rotacioni_pins), #BANDA NAPRAVI OVO DA ZNM STA COVJEKU SLAT
-			SimonSays( self.simon_button_pins, self.simon_led_pins,  self.simons_word)]
-
-		self.publish_labirint_path()
-
-		self.main_timer.init(mode=Timer.PERIODIC, callback=self.main)
-		self.countdown.init(mode=Timer.ONE_SHOT, callback=self.explode)
-
-	def subscription(self, topic, msg):
-		if topic == b'katane/main_inbox/modul_solved_count': 
-			self.solved_count_slave = int(msg)
-		if topic == b'katane/game_start' and msg == b'1':
-			self.run()
-		if topic == b'katane/main_inbox/strike' and msg == b'1': # ovo koristim za broj greski
-			self.strikes -= 1
-
-
-	def explode(self, t):
-		self.mqtt.publish(b'katane/game_over', b'lose')
-		self.main_timer.deinit() 
-
-	def publish_labirint_path(self):
-		l = self.moduli[0].get_path()
-		json_str = json.dumps(l)
-		self.mqtt.publish(b'katane/labirint/path', json_str.encode('ascii'))
-
-
-	@staticmethod
-	def generate_simon_word(state):
-		#banda napravi ovo
-
-	def display_rgb_state(self, state):
-		r = Pin(self.rgb_pins[0])
-		g = Pin(self.rgb_pins[1])
-		b = Pin(self.rgb_pins[2])
-
-		r.value(state & 100)
-		b.value(state & 010)
-		g.value(state & 001)
-
+while game_running:
+	print('igra u toku...')
+	time.sleep(0.5)
