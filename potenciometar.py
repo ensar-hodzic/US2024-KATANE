@@ -1,13 +1,14 @@
 from machine import Pin, ADC, Timer
 
 class Potenciometar:
+    potencimetar_values = [ 10, 30, 50, 20, 40, 60, 70, 0]
     T = 100
     eps = 5 # tolerancija 
     # pins - broj pina za potenciometar
-    def __init__(self, pins):
+    def __init__(self, state, pins):
         self.solved = False
         self.potenciometar = ADC(pins[0])
-        self.sifra = random.randrange(0,100)
+        self.sifra = self.potencimetar_values[state]
         self.timerPot = Timer(mode=Timer.PERIODIC, period=self.T, callback=self.PotenciometarGame)
 
 
@@ -21,6 +22,6 @@ class Potenciometar:
     def solved(self):
         return self.solved
 
-    def get_sifra(self): #TODO: u main poslati app koja je sifra
+    def get_sifra(self):
         return self.sifra
             

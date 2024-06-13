@@ -2,6 +2,9 @@ from machine import ADC, Pin, Timer
 
 
 class Morse:
+	code_book = [('TVRD', 1500, 0.5), ('2024', 2500, 0.5), ('US24', 1000, 0.5),
+			('BOMB', 1500, 0.6), ('BOOM', 2500, 0.6), ('KAFA', 1000, 0.6),
+			('SOS', 1500, 0.4), ('ZELJO', 2500, 0.4)]
 	morse = {
 	    'A': '.-',    'B': '-...',  'C': '-.-.',  'D': '-..',
 	    'E': '.',     'F': '..-.',  'G': '--.',   'H': '....',
@@ -20,7 +23,9 @@ class Morse:
 	# pins su liste brojeva pinova oblika [LED_PIN_NUM,AD_IN]
 	# frequency je frekvencija trazenog kvadratnog talasa
 	# duty je duty cycle trazenog signala [0.0, 1.0]
-	def __init__(self, word:str, pins: list, frequency:float, duty:float = 0.5):
+	def __init__(self, state, pins: list):
+		word, frequency, duty = code_book[state]
+
 		self.solved = False
 		self.led = Pin(pins[0], Pin.OUT)
 		self.analog = ADC(Pin(pins[1], Pin.IN))
