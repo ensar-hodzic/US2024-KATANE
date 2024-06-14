@@ -10,7 +10,8 @@ class Labirint:
     cs = Pin(15, Pin.OUT)   #CHIP SELECT i spi su hardcodirani pinovi!
     def __init__(self, buttons:list):
         self.buttons = [Pin(i,Pin.IN) for i in buttons]
-
+        self.solved  = False
+        self.strikes = 0
         self.display = max7219.Matrix8x8(self.spi, self.cs, 1)  
 
 
@@ -34,6 +35,7 @@ class Labirint:
             for j in range(8):
                 self.maze[i][j]=False
         self.display.display_matrix(self.maze)
+        self.solved  = True
         print("Svaka ti dala")
 
     def prikaziIgraca(self, tim):
@@ -119,6 +121,7 @@ class Labirint:
             self.display.display_matrix(self.maze)
         else:
             print("BONK")
+            self.strikes += 1
 
     def Gore(self,irq):
         if time.ticks_ms()-self.debouncer<300:
@@ -131,6 +134,7 @@ class Labirint:
             self.display.display_matrix(self.maze)
         else:
             print("BONK")
+            self.strikes += 1
 
 
     def Lijevo(self,irq):
@@ -144,6 +148,7 @@ class Labirint:
             self.display.display_matrix(self.maze)
         else:
             print("BONK")
+            self.strikes += 1
 
     def Dolje(self,irq):
         if time.ticks_ms()-self.debouncer<300:
@@ -156,6 +161,10 @@ class Labirint:
             self.display.display_matrix(self.maze)
         else:
             print("BONK")
+            self.strikes += 1
+
+    def get_strikes(self) 
+        return self.strikes
 
     @staticmethod
     def create_direct_path(maze, start, end):
