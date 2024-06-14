@@ -26,6 +26,11 @@ solved_slave = 0
 strike_slave = 0
 main_timer = Timer(-1)
 game_running = False
+
+#___________________________________Pinouts_____________________________________________________#
+labirint_pins = [] # tasteri labirinta on vec zauzima SPI pinove
+display_pins = [] # ovo je 7seg disp ako se dbr sjecam
+encoder_pins = [] # jasno
 #___________________________________Pomocne funkcije____________________________________________#
 def subscribe(topic, msg):
 	global slave_present, app_present, game_running, game_start, strike_slave, solved_slave

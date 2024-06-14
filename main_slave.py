@@ -23,6 +23,17 @@ import ujson
 main_ready = False
 state = 0
 run = False
+#___________________________________Pinouts_____________________________________________________#
+
+simon_buttons = []
+simon_leds = []
+pins_izlazna = [] # za matricnu tastaturu
+pins_ulazna = [] # mislim da su ovo redovi po sjecanju
+pin_potenciometar = []
+morse_pins = [] # jedna ledica za morse kod prikaz
+display_pins = []
+rot_encoder_pins = []
+wire_pins = []
 #___________________________________Pomocne funkcije____________________________________________#
 def subscribe(topic, msg):
 	global run, main_ready, state, main_timer
@@ -80,7 +91,8 @@ moduli_pool = [SimonSays(state, simon_buttons, simon_leds),
 				MatricnaGame(state, pins_izlazna, pins_ulazna),
 				Potenciometar(state, pin_potenciometar),
 				Morse(state, morse_pins),
-				Button(state, display_pins, rot_encoder_pins)]
+				Button(state, display_pins, rot_encoder_pins),
+				Wires(state, wire_pins)]
 
 main_timer = Timer(period=100, mode=Timer.PERIODIC, callback=check)
 
