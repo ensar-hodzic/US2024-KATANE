@@ -53,8 +53,16 @@ class Labirint:
             j = random.randint(0, i)
             directions[i], directions[j] = directions[j], directions[i]
 
+
     @staticmethod
     def generate_maze(): 
+    """
+    Ovo trenutno generira nasumicni lavirint, i prikazuje isti na ekran
+    Ja mislim da je poenta da postoje 8 mogucih lavirinata.
+    NE prikazuju se na ekran, vec je u manualu izgled lavirinta, 
+    a na ekran se samo prikaze trenutna pozicija.
+    TODO: generate_maze(state) -> MOGUCI_LAVIRINTI[state]
+    """
         random.seed(time.ticks_ms())    #U ZAVISNOSTI KAD KLIKNE GENERIŠE SE RANDOM
         
         maze = [[True] * 8 for _ in range(8)]
