@@ -26,13 +26,7 @@ while not nic.isconnected():
 state = rgb_randomiser()
 
 
-mqtt_conn = MQTTClient(clientid='master', server='broker.hivemq.com', user='', password='', port=1883)
-mqtt_conn.set_callback(subscription)
-mqtt_conn.connect()
 
-
-moduli=[b"katane/morse", b"katane/simon_says", b"katane/button_press", b"katane/wires", b"katane/password"]# lista modula na slaveu
-mqtt_conn.subscribe(moduli)
 # daj konfiguraciju slaveu
 
 

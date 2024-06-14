@@ -24,7 +24,7 @@ class Morse:
 	# frequency je frekvencija trazenog kvadratnog talasa
 	# duty je duty cycle trazenog signala [0.0, 1.0]
 	def __init__(self, state, pins: list):
-		word, frequency, duty = code_book[state]
+		word, frequency, duty = self.code_book[state]
 
 		self.solved = False
 		self.led = Pin(pins[0], Pin.OUT)
