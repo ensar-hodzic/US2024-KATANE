@@ -97,3 +97,4 @@ main_timer = Timer(period=100, mode=Timer.PERIODIC, callback=check)
 
 while run:
 	print('game is running...')
+	time.sleep(1)

@@ -71,7 +71,7 @@ def check(t):
 		print('ggwp')
 		game_running = False
 
-def publish_state():
+def publish_state(state, max_strike):
 	json = '{ "state": ' + str(state) + ',"max_strike": ' + str(max_strike) + ' }'
 	mqtt_conn.publish(b'katane/game_state', json.encode('ascii'))
 
@@ -111,7 +111,7 @@ while not game_start:
 
 state, max_strike = rgb_randomiser()
 
-publish_state()
+publish_state(state, max_strike)
 
 count_down = Timer(period=3 * 1000 * 60, mode=Timer.ONE_SHOT, callback=explode)
 
