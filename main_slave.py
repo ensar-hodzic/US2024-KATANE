@@ -3,12 +3,12 @@ import time
 import network
 from umqtt.robust import MQTTClient
 import ujson
-from simonsays import *
-from morse import *
-from button import *
-from matricna import *
-from potenciometar import *
-
+from simonsays import SimonSays
+from morse import Morse
+from matricna import MatricnaGame
+from potenciometar import Potenciometar
+from button import Button
+from wires import Wires
 # Raspberry master
 
 # spoji se na internet
@@ -31,8 +31,7 @@ pins_izlazna = [] # za matricnu tastaturu
 pins_ulazna = [] # mislim da su ovo redovi po sjecanju
 pin_potenciometar = []
 morse_pins = [] # jedna ledica za morse kod prikaz
-display_pins = []
-rot_encoder_pins = []
+button_game_pins = []
 wire_pins = []
 #___________________________________Pomocne funkcije____________________________________________#
 def subscribe(topic, msg):
@@ -48,9 +47,8 @@ def subscribe(topic, msg):
 		run = False
 
 def check(t):
-	global moduli_pool
+	global moduli_pool, strikes, solved
 	strikes = 0
-	solved = 0
 	new_pool = []
 	for m in moduli_pool:
 		if not m.solved:
@@ -91,7 +89,7 @@ moduli_pool = [SimonSays(state, simon_buttons, simon_leds),
 				MatricnaGame(state, pins_izlazna, pins_ulazna),
 				Potenciometar(state, pin_potenciometar),
 				Morse(state, morse_pins),
-				Button(state, display_pins, rot_encoder_pins),
+				Button(state, button_game_pins),
 				Wires(state, wire_pins)]
 
 main_timer = Timer(period=100, mode=Timer.PERIODIC, callback=check)

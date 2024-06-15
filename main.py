@@ -3,8 +3,8 @@ import time
 import network
 from umqtt.robust import MQTTClient
 import ujson
-from labirint import *
-from decode import *
+from labirint import Labirint
+from decode import DecodeModul
 
 # Raspberry master
 
@@ -42,7 +42,7 @@ def subscribe(topic, msg):
 		game_running = True
 		game_start = True
 	if topic == b'katane/slave_solved':
-		solved_slave += int(msg)
+		solved_slave = int(msg)
 	if topic == b'katane/slave_strike':
 		strike_slave = int(msg)
 
