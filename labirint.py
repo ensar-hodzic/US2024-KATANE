@@ -5,7 +5,7 @@ from machine import Pin, SPI,  Timer
 
 class Labirint:
     DIRECTIONS = [(0, 1), (0, -1), (1, 0), (-1, 0)] 
-    spi = SPI(1, baudrate=10000000, polarity=0, phase=0, sck=Pin(10), mosi=Pin(11)) #DIN(10) CLK(11) 
+    spi = SPI(0, baudrate=10000000, polarity=0, phase=0, sck=Pin(18), mosi=Pin(19)) #DIN(18) CLK(19) 
     # Initialize CS (Chip Select) pin
     cs = Pin(15, Pin.OUT)   #CHIP SELECT i spi su hardcodirani pinovi!
     def __init__(self, buttons:list):
