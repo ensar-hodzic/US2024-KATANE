@@ -4,7 +4,7 @@ import network
 from umqtt.robust import MQTTClient
 import ujson
 from labirint import Labirint
-from decode import DecodeModul
+from decoder import Decoder
 
 # Raspberry master
 
@@ -28,9 +28,11 @@ main_timer = Timer(-1)
 game_running = False
 
 #___________________________________Pinouts_____________________________________________________#
-labirint_pins = [] # tasteri labirinta on vec zauzima SPI pinove
-display_pins = [] # ovo je 7seg disp ako se dbr sjecam
-encoder_pins = [] # jasno
+labirint_pins = [21,22,26,27] # tasteri labirinta lijevo, gore, dole, desno
+display_pins = [0, 18,19,20] # labirint display: spi, SCK, MOSI, CSm
+encoder_pins = [0,1,2] # jasno clk, dt, sw
+segmenti = [4,5,6,7] #
+digits = [8,9,10,11,12,13,14,15] #
 #___________________________________Pomocne funkcije____________________________________________#
 def subscribe(topic, msg):
 	global slave_present, app_present, game_running, game_start, strike_slave, solved_slave
@@ -115,7 +117,7 @@ publish_state(state, max_strike)
 
 count_down = Timer(period=3 * 1000 * 60, mode=Timer.ONE_SHOT, callback=explode)
 
-moduli = [Labirint(state, labirint_pins), DecodeModul(state, display_pins, encoder_pins)]
+moduli = [Labirint(state, labirint_pins), Decoder(encoder_pins, segmenti, digits, state)]
 main_timer.init(period=100, mode=Timer.PERIODIC, callback=check)
 
 

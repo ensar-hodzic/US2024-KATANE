@@ -18,12 +18,13 @@ class Decoder:
         9: (0, 0, 0, 0, 1, 0, 0)
     }
 
-    def __init__(self,clk,dt,sw,segmenti,digits,rjesenje)
+    # pins: clk, dt, sw
+    def __init__(self, pins:list, segmenti, digits, rjesenje)
         self.solved=False
-        self.clk = Pin(clk, Pin.IN) # 
-        self.dt = Pin(dt, Pin.IN) # decoder dijelovi
-        self.sw = Pin(sw, Pin.IN) # 
-        self.rjesenje=rjesenje
+        self.clk = Pin(pins[0], Pin.IN) # 
+        self.dt = Pin(pins[1], Pin.IN) # decoder dijelovi
+        self.sw = Pin(pins[2], Pin.IN) # 
+        self.rjesenje=10 * rjesenje + 10
         self.segmenti=[Pin(pin,Pin.OUT) for pin in segmenti]
         self.digits = [Pin(pin,Pin.OUT) for pin in digits]
         

@@ -5,13 +5,19 @@ from machine import Pin, SPI,  Timer
 
 class Labirint:
     DIRECTIONS = [(0, 1), (0, -1), (1, 0), (-1, 0)] 
-    spi = SPI(0, baudrate=10000000, polarity=0, phase=0, sck=Pin(18), mosi=Pin(19)) #DIN(18) CLK(19) 
-    # Initialize CS (Chip Select) pin
-    cs = Pin(15, Pin.OUT)   #CHIP SELECT i spi su hardcodirani pinovi!
-    def __init__(self, buttons:list):
+    
+    #display: spi, SCK, MOSI, CS
+
+    def __init__(self, buttons:list, display_pins:list):
         self.buttons = [Pin(i,Pin.IN) for i in buttons]
         self.solved  = False
         self.strikes = 0
+
+        spi = SPI(display_pins[0], baudrate=10000000, polarity=0, phase=0, 
+                    sck=Pin(display_pins[1]), mosi=Pin(display_pins[2])) #DIN(18) CLK(19) 
+        # Initialize CS (Chip Select) pin
+        cs = Pin(display_pins[3], Pin.OUT)   #CHIP SELECT i spi su hardcodirani pinovi!
+
         self.display = max7219.Matrix8x8(self.spi, self.cs, 1)  
 
 
