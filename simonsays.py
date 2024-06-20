@@ -1,7 +1,10 @@
 from machine import Pin, Timer
 import time
 class SimonSays:
-    def __init__(self, button_pins, led_pins, code):
+    #vrijeme izmedju paljenja ledova u sekvenci
+    T = 1000
+    #unijeti brojeve pinova
+    def __init__(self, button_pins:list, led_pins:list, code:list):
         self.buttons = [Pin(pin, Pin.IN, Pin.PULL_DOWN) for pin in button_pins]
         self.leds = [Pin(pin, Pin.OUT) for pin in led_pins]
         self.code = code
@@ -15,7 +18,35 @@ class SimonSays:
         self.greske=0
         for button in self.buttons:
             button.irq(trigger=Pin.IRQ_RISING,handler=self.button_handler)
+        self.checkingInput=Timer(-1)
+        self.prikazujSekvencu=Timer(-1)
+        
+        self.checkingInput.init(period=200,mode=Timer.PERIODIC,callback=self.checkInput)
+        self.show_timer.init(period=self.T,mode=Timer.PERIODIC,callback=self.turn_on_led)#PRIKAZI SEKVENCU
+        #vrijeme izmedju prikazivanja sekvence
+        self.prikazujSekvencu.init(period=self.T*len(self.code)*2,mode=Timer.PERIODIC,callback=self.prikaziSekvencu)
 
+    def prikaziSekvencu(self,pin):
+        if  not self.user_input and not self.solved: 
+            self.show_timer.init(period=self.T,mode=Timer.PERIODIC,callback=self.turn_on_led)#PRIKAZI SEKVENCU
+        
+    
+    def checkInput(self,pin):
+        if len(self.user_input)==len(self.code):    
+            if  self.user_input == self.code:
+                print("Bravo!")
+                for led in self.leds:
+                    led.on()
+                self.solved=True
+                pin.deinit()
+            else:
+                self.output_index=0
+                self.input_index=0
+                self.user_input=[]
+                self.reset_leds()
+                print("Ponovo.")
+                self.greske = self.greske + 1
+        
     def button_handler(self,pin):
         current_time = time.ticks_ms()
         if time.ticks_diff(current_time, self.last_interrupt_time) > self.DEBOUNCE_TIME:
@@ -40,7 +71,7 @@ class SimonSays:
             self.output_index = self.output_index + 1
         else:
             self.leds[self.code[self.output_index-1]].off()
-            output_index=0
+            self.output_index=0
             pin.deinit()
 
     def ShowFailure(self,pin):
@@ -52,24 +83,7 @@ class SimonSays:
             self.output_index+=1
             for led in self.leds:
                 led.value(not led.value())
-    
-    def play(self):
-        while not self.solved:
-            self.output_index=0
-            self.input_index=0
-            self.user_input=[]
-            self.reset_leds()
-            self.show_timer.init(period=500,mode=Timer.PERIODIC,callback=self.turn_on_led)#PRIKAZI SEKVENCU
-            print("Ponovi sekvencu")
-            while len(self.user_input) < len(self.code):
-                time.sleep_ms(10)
-            if self.user_input == self.code:
-                print("Bravo!")
-                for led in self.leds:
-                    led.on()
-                self.solved=True
-            else:
-                print("Ponovo.")
-                self.greske+=1                
+                    
                 
 
+game = SimonSays([0,1,2,3],[4,5,6,7],[0,1,2,3])
