@@ -29,7 +29,7 @@ game_running = False
 
 #___________________________________Pinouts_____________________________________________________#
 labirint_pins = [21,22,26,27] # tasteri labirinta lijevo, gore, dole, desno
-display_pins = [0, 18,19,20] # labirint display: spi, SCK, MOSI, CSm
+display_pins = [0, 18,19,16] # labirint display: spi, SCK, MOSI, CSm
 encoder_pins = [0,1,2] # jasno clk, dt, sw
 segmenti = [4,5,6,7] #
 digits = [8,9,10,11,12,13,14,15] #
