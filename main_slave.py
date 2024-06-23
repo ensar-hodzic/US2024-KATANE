@@ -35,9 +35,10 @@ button_game_pins = [15] # jedno dugme, button zauzima vec ss=16, sck=18, mosi=19
 wire_pins = [17, 20, 21, 22, 26] # sta god ali 5
 #___________________________________Pomocne funkcije____________________________________________#
 def subscribe(topic, msg):
-	global run, main_ready, state, main_timer
+	global run, main_ready, state, main_timer, spammer
 	if topic == b'katane/main_ready' and msg == b'1':
 		main_ready = True
+		spammer.deinit()
 	if topic == b'katane/game_state':
 		parsed = ujson.loads(msg)
 		state = int(parsed["state"])
@@ -47,19 +48,33 @@ def subscribe(topic, msg):
 		run = False
 
 def check(t):
-	global moduli_pool, strikes, solved
-	strikes = 0
+	global moduli_pool, strikes, solved, solved_moduli
+	
+	new_strikes = 0
 	new_pool = []
+
+	for m in solved_moduli:
+		new_strikes += m.get_strikes()
+
 	for m in moduli_pool:
-		if not m.solved:
-			new_pool.append(m)
+		new_strikes += m.get_strikes()
+		if m.solved:
+			solved_moduli.append(m)
 		else:
-			solved += 1
-		strikes += m.get_strikes()
+			new_pool.append(m)
+
 	moduli_pool = new_pool
-	mqtt_conn.publish(b'katane/slave_strike', str(strikes).encode('ascii'))
-	if solved != 0:
+
+	if new_strikes != strikes:
+		strikes = new_strikes
+		mqtt_conn.publish(b'katane/slave_strike', str(strikes).encode('ascii'))
+	if solved != len(solved_moduli):
+		solved = len(solved_moduli)
 		mqtt_conn.publish(b'katane/slave_solved', str(solved).encode('ascii'))
+
+def spam(t):
+	mqtt_conn.publish(b'katane/slave_present', b'1')
+	print('main ziv sam!!!')
 #___________________________________Spajanje na Wifi____________________________________________#
 
 network_name = 'Wifi'
@@ -79,10 +94,15 @@ mqtt_conn.set_callback(subscribe)
 mqtt_conn.connect()
 mqtt_conn.subscribe(b"katane/#")
 
+spammer = Timer(period=100, mode=Timer.PERIODIC, callback=spam)
+
 while not main_ready:
+	mqtt_conn.publish(b'katane/slave_present', b'1')
+	print('cekam main da se javi da je ziv')
 	mqtt_conn.wait_msg()
 
 while not run:
+	print('cekam informacije o igri...')
 	mqtt_conn.wait_msg()
 
 moduli_pool = [SimonSays(state, simon_buttons, simon_leds),
@@ -92,9 +112,13 @@ moduli_pool = [SimonSays(state, simon_buttons, simon_leds),
 				Button(state, button_game_pins),
 				Wires(state, wire_pins)]
 
+solved_moduli = []
+
 main_timer = Timer(period=100, mode=Timer.PERIODIC, callback=check)
 
 
 while run:
 	print('game is running...')
 	time.sleep(1)
+
+print('Game over!')

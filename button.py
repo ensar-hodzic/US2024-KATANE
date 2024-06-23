@@ -73,7 +73,7 @@ class Button:
 
     def __init__(self, seeds, button_pin):
         global button, time, dots, display, seed
-        button = Pin(button_pin[0],Pin.IN)
+        button = Pin(button_pin[0],Pin.IN, Pin.PULL_UP)
         time=0
         dots=0
 

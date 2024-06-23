@@ -9,7 +9,7 @@ class Labirint:
     #display: spi, SCK, MOSI, CS
 
     def __init__(self, buttons:list, display_pins:list):
-        self.buttons = [Pin(i,Pin.IN) for i in buttons]
+        self.buttons = [Pin(i,Pin.IN, Pin.PULL_UP) for i in buttons]
         self.solved  = False
         self.strikes = 0
 

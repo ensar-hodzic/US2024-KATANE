@@ -5,7 +5,7 @@ class SimonSays:
     T = 1000
     #unijeti brojeve pinova
     def __init__(self, button_pins:list, led_pins:list, code:list):
-        self.buttons = [Pin(pin, Pin.IN, Pin.PULL_DOWN) for pin in button_pins]
+        self.buttons = [Pin(pin, Pin.IN, Pin.PULL_UP) for pin in button_pins]
         self.leds = [Pin(pin, Pin.OUT) for pin in led_pins]
         self.code = code
         self.show_timer=Timer(-1)
@@ -86,4 +86,4 @@ class SimonSays:
                     
                 
 
-game = SimonSays([0,1,2,3],[4,5,6,7],[0,1,2,3])
+#game = SimonSays([0,1,2,3],[4,5,6,7],[0,1,2,3])

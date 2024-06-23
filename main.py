@@ -49,9 +49,17 @@ def subscribe(topic, msg):
 	if topic == b'katane/slave_strike':
 		strike_slave = int(msg)
 
-
+# postavlja rgb i vraca dozvoljeni broj strikeova i stanje igre
 def rgb_randomiser():
-	return random.randint(0, 7), random.randint(0,3)
+	state = random.randint(0, 7) 
+	strikes = random.randint(0,3)
+	ledice = [Pin(i, Pin.OUT) for i in rgb]
+	mask = 1
+	for led in ledice:
+		led.value(state & mask)
+		mask = mask << 1
+
+	return state, strikes
 
 def explode(t):
 	global game_running
@@ -62,6 +70,7 @@ def explode(t):
 def check(t):
 	global solved, strike, game_running
 	solved = 0
+	strike = 0
 	for m in moduli:
 		solved += m.solved
 		strike += m.get_strikes() 
@@ -109,12 +118,13 @@ mqtt_conn.publish(b'katane/main_ready', b'1') # javi telefonu da je main spreman
 
 while not game_start:
 	mqtt_conn.wait_msg()
+	print('cekam da telefon kaze da igra pocinje')
 
 #____________________________________Game Run_______________________________________#
 
 state, max_strike = rgb_randomiser()
 
-publish_state(state, max_strike)
+publish_state(state, max_strike) # javi slaveu stanje, a telefonu broj dozvoljenih pokusaja
 
 count_down = Timer(period=3 * 1000 * 60, mode=Timer.ONE_SHOT, callback=explode)
 
