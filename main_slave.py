@@ -8,7 +8,7 @@ from morse import Morse
 from matricna import MatricnaGame
 from potenciometar import Potenciometar
 from button import Button
-from wires import Wires
+from wirecutter import WireCutter
 # Raspberry master
 
 # spoji se na internet
@@ -110,7 +110,7 @@ moduli_pool = [SimonSays(state, simon_buttons, simon_leds),
 				Potenciometar(state, pin_potenciometar),
 				Morse(state, morse_pins),
 				Button(state, button_game_pins),
-				Wires(state, wire_pins)]
+				WireCutter(wire_pins, wire_pins, state)]
 
 solved_moduli = []
 

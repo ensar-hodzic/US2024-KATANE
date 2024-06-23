@@ -1,7 +1,9 @@
 from machine import Pin, Timer
 
 class WireCutter:
-    def __init__(self,outputs:list,inputs:list,valid_to_cut:list,inOrder:bool):
+    # ovo pretvori n zica u 2n pinova, mislim da se moze zica tretirati kao button!
+    # Pin.OUT -> ZICA -> GND bi trebalo biti ekvivalentno dugmetu
+    def __init__(self,outputs:list,inputs:list,valid_to_cut:list,inOrder:bool): 
 
         self.outputs = [Pin(pin, Pin.OUT) for pin in outputs]
         self.inputs = [Pin(pin, Pin.IN) for pin in inputs]
