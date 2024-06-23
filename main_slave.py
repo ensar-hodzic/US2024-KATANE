@@ -25,14 +25,14 @@ state = 0
 run = False
 #___________________________________Pinouts_____________________________________________________#
 
-simon_buttons = [8, 9, 12]
-simon_leds = [13, 14, 16]
+simon_buttons = [8, 9, 10]
+simon_leds = [11, 12, 13]
 pins_izlazna = [0, 1, 2, 3] # za matricnu tastaturu
 pins_ulazna = [4, 5, 6, 7] # mislim da su ovo redovi po sjecanju
 pin_potenciometar = [28]
-morse_pins = [17, 27] # jedna ledica za morse kod prikaz i ulaz signala
-button_game_pins = [9] # jedno dugme, button zauzima vec ss=15, sck=10, mosi=11!
-wire_pins = [18, 19, 20, 21, 22, 26] # sta god ali 6
+morse_pins = [14, 27] # jedna ledica za morse kod prikaz i ulaz signala
+button_game_pins = [15] # jedno dugme, button zauzima vec ss=16, sck=18, mosi=19!
+wire_pins = [17, 20, 21, 22, 26] # sta god ali 5
 #___________________________________Pomocne funkcije____________________________________________#
 def subscribe(topic, msg):
 	global run, main_ready, state, main_timer

@@ -3,12 +3,12 @@ from machine import Pin, SPI, Timer
 
 #dio što će ići u main slave pica:
 spi = SPI(0, baudrate=10000000, sck=Pin(18), mosi=Pin(19))
-ss = Pin(17, Pin.OUT)
+ss = Pin(16, Pin.OUT)
 display = max7219.Matrix8x8(spi, ss, 1)
 display.fill(0)
 display.show()
 
-button=Pin(20,Pin.IN)
+button=Pin(20,Pin.IN, Pin.PULL_UP)
 timer=Timer()
 time=0
 dots=0

@@ -33,6 +33,7 @@ display_pins = [0, 18,19,16] # labirint display: spi, SCK, MOSI, CSm
 encoder_pins = [0,1,2] # jasno clk, dt, sw
 segmenti = [4,5,6,7] #
 digits = [8,9,10,11,12,13,14,15] #
+rgb = [3,17,28]
 #___________________________________Pomocne funkcije____________________________________________#
 def subscribe(topic, msg):
 	global slave_present, app_present, game_running, game_start, strike_slave, solved_slave

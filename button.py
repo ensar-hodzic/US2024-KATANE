@@ -2,8 +2,8 @@ import max7219
 from machine import Pin, SPI, Timer
 
 #dio što će ići u main slave pica:
-spi = SPI(1, baudrate=10000000, sck=Pin(10), mosi=Pin(11))
-ss = Pin(15, Pin.OUT)
+spi = SPI(0, baudrate=10000000, sck=Pin(18), mosi=Pin(19))
+ss = Pin(16, Pin.OUT, Pin.PULL_DOWN)
 display = max7219.Matrix8x8(spi, ss, 1)
 display.fill(0)
 display.show()
