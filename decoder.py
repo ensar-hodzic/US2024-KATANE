@@ -14,7 +14,18 @@ class Decoder:
             7: [0,1,2],
             8: [0,1,2,3,4,5,6],
             9: [0,1,2,3,5,6]}
-    
+    arrSeg = [[1,1,1,1,1,1,0],
+            [0,1,1,0,0,0,0],
+            [1,1,0,1,1,0,1],
+            [1,1,1,1,0,0,1],
+            [0,1,1,0,0,1,1],
+            [1,0,1,1,0,1,1],
+            [1,0,1,1,1,1,1],
+            [1,1,1,0,0,0,0],
+            [1,1,1,1,1,1,1],
+            [1,1,1,1,0,1,1]]
+
+
     def __init__(self, seed, encoder_pins, segmenti, digits):
         self.clock_wise = Pin(encoder_pins[0], Pin.IN)
         self.counter_clock = Pin(encoder_pins[1], Pin.IN)
@@ -54,24 +65,25 @@ class Decoder:
         self.brojac = 0
 
     def display_digit(self, n):
+        l = self.arrSeg[n]
         for i in range(8):
-            self.segments[i](i not in Decoder.num2seg[n])
+            self.segments[i].value(l[i])
 
     def reset_digits(self):
         for i in range(4):
-            self.digits[i](True)
+            self.digits[i].value(False)
 
     def display(self, t):
         d, j = self.brojac // 10, self.brojac % 10
 
         self.reset_digits()
-        self.digits[0](False)
+        self.digits[0].value(True)
         self.display_digit(d)
         
         time.sleep(0.020)
 
-        self.digits[0](True)
-        self.digits[1](False)
+        self.digits[0].value(True)
+        self.digits[1].value(False)
         self.display_digit(j)
 
     def test_display(self):
