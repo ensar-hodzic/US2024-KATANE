@@ -1,17 +1,10 @@
-from machine import Pin
+from machine import Pin,Timer
 import time
 import network
-from umqtt.robust import MQTTClient
 import ujson
 from labirint import Labirint
 from decoder import Decoder
-
-# Raspberry master
-
-# spoji se na internet
-import network
-import time
-from machine import Pin
+import random
 from umqtt.robust import MQTTClient
 import ujson
 
@@ -31,12 +24,13 @@ game_running = False
 labirint_pins = [21,22,26,27] # tasteri labirinta lijevo, gore, dole, desno
 display_pins = [0, 18,19,16] # labirint display: spi, SCK, MOSI, CSm
 encoder_pins = [0,1,2] # jasno clk, dt, sw
-segmenti = [4,5,6,7] #
-digits = [8,9,10,11,12,13,14,15] #
+segmenti = [4,	5] #
+digits = [8,9,10,11,12,13,14] #
 rgb = [3,17,28]
 #___________________________________Pomocne funkcije____________________________________________#
 def subscribe(topic, msg):
 	global slave_present, app_present, game_running, game_start, strike_slave, solved_slave
+	print(topic.upper())
 	if topic == b'katane/slave_present' and msg == b'1':
 		slave_present = True
 	if topic == b'katane/app_present' and msg == b'1':
@@ -73,9 +67,11 @@ def check(t):
 	strike = 0
 	for m in moduli:
 		solved += m.solved
-		strike += m.get_strikes() 
+		strike += m.get_strikes()
+		print("greske je dao", strike, m)
 	if strike + strike_slave > max_strike:
 		explode(t)
+		print("its  me hi")
 	elif solved + solved_slave == 7:
 		count_down.deinit()
 		mqtt_conn.publish(b'katane/game_over', b'win')
@@ -89,27 +85,32 @@ def publish_state(state, max_strike):
 
 #___________________________________Spajanje na Wifi____________________________________________#
 
-network_name = 'Wifi'
-network_password = 'password'
+network_name = 'Lab220'
+network_password = 'lab220lozinka'
 
 nic = network.WLAN(network.STA_IF)
-nic.activate(True)
+nic.active(True)
 nic.connect(network_name, network_password)
 
 while not nic.isconnected():
     print('Cekam vezu')
     time.sleep(1)
+print("spojeno")
 
+print(nic.ifconfig())
 #___________________________________Game setup____________________________________________#
 
-mqtt_conn = MQTTClient(client_id='masterpico', server='broker.hivemq.com',user='',password='',port=1883)
+mqtt_conn = MQTTClient(client_id='nestonase', server='broker.emqx.io',user='',password='',port=1883)
 mqtt_conn.set_callback(subscribe)
 mqtt_conn.connect()
 mqtt_conn.subscribe(b"katane/#")
 
+
 while not slave_present:
 	print('cekam slave da se javi')
 	mqtt_conn.wait_msg()
+
+print("dalje")
 while not app_present:
 	print('cekam aplikaciju sa telefona da se javi')
 	mqtt_conn.wait_msg()
@@ -128,10 +129,11 @@ publish_state(state, max_strike) # javi slaveu stanje, a telefonu broj dozvoljen
 
 count_down = Timer(period=3 * 1000 * 60, mode=Timer.ONE_SHOT, callback=explode)
 
-moduli = [Labirint(state, labirint_pins), Decoder(encoder_pins, segmenti, digits, state)]
+moduli = [Labirint( labirint_pins, display_pins), Decoder(encoder_pins,  digits,segmenti, state)]
 main_timer.init(period=100, mode=Timer.PERIODIC, callback=check)
 
 
 while game_running:
 	print('igra u toku...')
 	time.sleep(0.5)
+

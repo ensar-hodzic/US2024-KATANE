@@ -13,10 +13,10 @@ class Labirint:
         self.solved  = False
         self.strikes = 0
 
-        spi = SPI(display_pins[0], baudrate=10000000, polarity=0, phase=0, 
+        self.spi = SPI(display_pins[0], baudrate=10000000, polarity=0, phase=0, 
                     sck=Pin(display_pins[1]), mosi=Pin(display_pins[2])) #DIN(18) CLK(19) 
         # Initialize CS (Chip Select) pin
-        cs = Pin(display_pins[3], Pin.OUT)   #CHIP SELECT i spi su hardcodirani pinovi!
+        self.cs = Pin(display_pins[3], Pin.OUT)   #CHIP SELECT i spi su hardcodirani pinovi!
 
         self.display = max7219.Matrix8x8(self.spi, self.cs, 1)  
 
@@ -64,13 +64,7 @@ class Labirint:
 
     @staticmethod
     def generate_maze(): 
-    """
-    Ovo trenutno generira nasumicni lavirint, i prikazuje isti na ekran
-    Ja mislim da je poenta da postoje 8 mogucih lavirinata.
-    NE prikazuju se na ekran, vec je u manualu izgled lavirinta, 
-    a na ekran se samo prikaze trenutna pozicija.
-    TODO: generate_maze(state) -> MOGUCI_LAVIRINTI[state]
-    """
+
         random.seed(time.ticks_ms())    #U ZAVISNOSTI KAD KLIKNE GENERIŠE SE RANDOM
         
         maze = [[True] * 8 for _ in range(8)]
@@ -169,7 +163,7 @@ class Labirint:
             print("BONK")
             self.strikes += 1
 
-    def get_strikes(self) 
+    def get_strikes(self): 
         return self.strikes
 
     @staticmethod
@@ -193,3 +187,4 @@ class Labirint:
     def print_maze(maze):
         for row in maze:
             print(" ".join('1' if cell else '0' for cell in row))
+
