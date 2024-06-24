@@ -16,9 +16,9 @@ class Decoder:
             9: [0,1,2,3,5,6]}
     
     def __init__(self, seed, encoder_pins, segmenti, digits):
-        self.clock_wise = Pin(0, Pin.IN)
-        self.counter_clock = Pin(1, Pin.IN)
-        self.press = Pin(2, Pin.IN) 
+        self.clock_wise = Pin(encoder_pins[0], Pin.IN)
+        self.counter_clock = Pin(encoder_pins[1], Pin.IN)
+        self.press = Pin(encoder_pins[2], Pin.IN) 
 
         self.brojac = 0
         self.solved = False
