@@ -1,7 +1,6 @@
 from machine import Pin,Timer
 import time
 import network
-import ujson
 from labirint import Labirint
 from decoder import Decoder
 import random

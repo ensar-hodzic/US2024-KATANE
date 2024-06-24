@@ -1,4 +1,4 @@
-from machine import Pin
+from machine import Pin, Timer
 import time
 import network
 from umqtt.robust import MQTTClient
@@ -9,15 +9,6 @@ from matricna import MatricnaGame
 from potenciometar import Potenciometar
 from button import Button
 from wirecutter import WireCutter
-# Raspberry master
-
-# spoji se na internet
-import network
-import time
-from machine import Pin
-from umqtt.robust import MQTTClient
-import ujson
-
 
 #___________________________________Glob varijable______________________________________________#
 main_ready = False
@@ -89,7 +80,7 @@ while not nic.isconnected():
     time.sleep(1)
 
 #___________________________________Game setup____________________________________________#
-mqtt_conn = MQTTClient(client_id='slavepico', server='broker.hivemq.com',user='',password='',port=1883)
+mqtt_conn = MQTTClient(client_id='slavepico', server='broker.emqx.io',user='',password='',port=1883)
 mqtt_conn.set_callback(subscribe)
 mqtt_conn.connect()
 mqtt_conn.subscribe(b"katane/#")
