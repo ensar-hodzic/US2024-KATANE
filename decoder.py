@@ -2,21 +2,18 @@ import time
 from machine import Pin, Timer
 
 class Decoder:
-    brojevi = {
-        0: (0, 0, 0, 0, 0, 0, 1),
-        1: (1, 0, 0, 1, 1, 1, 1),
-        2: (0, 0, 1, 0, 0, 1, 0),
-        3: (0, 0, 0, 0, 1, 1, 0),
-        4: (1, 0, 0, 1, 1, 0, 0),
-        5: (0, 1, 0, 0, 1, 0, 0),
-        6: (0, 1, 0, 0, 0, 0, 0),
-        7: (0, 0, 0, 1, 1, 1, 1),
-        8: (0, 0, 0, 0, 0, 0, 0),
-        9: (0, 0, 0, 0, 1, 0, 0)
-    }
     rjesenja = [17,73,29,31,7,20,47,97]
     
-    
+    num2seg = {0: [0,1,2,3,4,5], 
+            1: [1,2],
+            2: [0,1,3,4,6],
+            3: [0,1,2,3,6],
+            4: [1,2,5,6],
+            5: [0,2,3,5,6],
+            6: [0,2,3,4,5,6],
+            7: [0,1,2],
+            8: [0,1,2,3,4,5,6],
+            9: [0,1,2,3,5,6]}
     
     def __init__(self, seed, encoder_pins, segmenti, digits):
         self.clock_wise = Pin(0, Pin.IN)
@@ -32,7 +29,7 @@ class Decoder:
         self.segmenti = [Pin(pin, Pin.OUT) for pin in segmenti]
         self.digits = [Pin(pin, Pin.OUT) for pin in digits]
 
-        self.display = Timer(period=45, mode=Timer.PERIODIC, callback=self.prikaziBroj)
+        self.display_timer = Timer(period=45, mode=Timer.PERIODIC, callback=self.display)
 
         self.clock_wise.irq(self.handle1, Pin.IRQ_FALLING)
         self.counter_clock.irq(self.handle2, Pin.IRQ_FALLING)
@@ -50,25 +47,41 @@ class Decoder:
         if self.brojac != self.seed:
             self.strikes += 1
         else:
-            self.press.irq(None, 0)    
+            self.press.irq(None, 0)  
+            self.solved = True
+            self.display_timer.deinit()  
         
         self.brojac = 0
 
-    def prikaziBroj(self, pin):
-        cifre = [self.brojac // 10, self.brojac % 10]
-        self.digits[0].value(1)
-        self.digits[1].value(0)
-        t = self.brojevi[cifre[0]]
+    def display_digit(self, n):
         for i in range(8):
-            self.segmenti[i].value(t[i])
+            self.segments[i](i not in Decoder.num2seg[n])
+
+    def reset_digits(self):
+        for i in range(4):
+            self.digits[i](True)
+
+    def display(self, t):
+        d, j = self.brojac // 10, self.brojac % 10
+
+        self.reset_digits()
+        self.digits[0](False)
+        self.display_digit(d)
         
-        time.sleep(0.02)
-        self.digits[0].value(0)
-        self.digits[1].value(1)
-        t = self.brojevi[cifre[1]]
-        for i in range(8):
-            self.segmenti[i].value(t[i])
-        
+        time.sleep(0.020)
+
+        self.digits[0](True)
+        self.digits[1](False)
+        self.display_digit(j)
+
+    def test_display(self):
+        self.reset_digits()
+        for s in self.segmenti:
+            self.reset_digits()
+            s.value(False)
+            for i in range(10): 
+                self.display_digit(i)
+                time.sleep(1)
 
     def get_strikes(self):
         return self.strikes
