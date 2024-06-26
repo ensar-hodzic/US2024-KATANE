@@ -27,6 +27,7 @@ segmenti = [4,	5] #
 digits = [8,9,10,11,12,13,14] #
 rgb = [3,17,28]
 #___________________________________Pomocne funkcije____________________________________________#
+topics = [b'katane/slave_present', b'katane/app_present', b'katane/game_start', b'katane/slave_solved', b'katane/slave_strike']
 def subscribe(topic, msg):
 	global slave_present, app_present, game_running, game_start, strike_slave, solved_slave
 	print(topic.upper())
@@ -71,16 +72,18 @@ def check(t):
 	if strike + strike_slave > max_strike:
 		explode(t)
 		print("its  me hi")
-	elif solved + solved_slave == 7:
+	elif solved + solved_slave == 5:
 		count_down.deinit()
 		mqtt_conn.publish(b'katane/game_over', b'win')
 		main_timer.deinit()
 		print('ggwp')
 		game_running = False
+	mqtt_conn.publish(b'katane/strikes', str(strike + strike_slave).encode('ascii'))
+	mqtt_conn.publish(b'katane/solved', str(solved + solved_slave).encode('ascii'))
 
 def publish_state(state, max_strike):
 	json = '{ "state": ' + str(state) + ',"max_strike": ' + str(max_strike) + ' }'
-	mqtt_conn.publish(b'katane/game_state', json.encode('ascii'))
+	mqtt_conn.publish(b'katane/game_state', json.encode('ascii'), False, 1)
 
 #___________________________________Spajanje na Wifi____________________________________________#
 
@@ -99,10 +102,12 @@ print("spojeno")
 print(nic.ifconfig())
 #___________________________________Game setup____________________________________________#
 
-mqtt_conn = MQTTClient(client_id='nestonase', server='broker.emqx.io',user='',password='',port=1883)
+broker='192.168.100.10'
+mqtt_conn = MQTTClient(client_id='nestonase', server='broker.emqx.io',user='',password='',port=1883, keepalive=300)
 mqtt_conn.set_callback(subscribe)
 mqtt_conn.connect()
-mqtt_conn.subscribe(b"katane/#")
+for topic in topics:
+	mqtt_conn.subscribe(topic)
 
 
 while not slave_present:
@@ -129,10 +134,14 @@ publish_state(state, max_strike) # javi slaveu stanje, a telefonu broj dozvoljen
 count_down = Timer(period=3 * 1000 * 60, mode=Timer.ONE_SHOT, callback=explode)
 
 moduli = [Labirint( labirint_pins, display_pins), Decoder(encoder_pins,  digits,segmenti, state)]
-main_timer.init(period=100, mode=Timer.PERIODIC, callback=check)
+main_timer.init(period=500, mode=Timer.PERIODIC, callback=check)
 
 
 while game_running:
 	print('igra u toku...')
 	time.sleep(0.5)
 
+print('gg')
+
+for m in moduli:
+	m.deinit() 

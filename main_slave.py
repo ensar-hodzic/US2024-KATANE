@@ -25,6 +25,7 @@ morse_pins = [14, 27] # jedna ledica za morse kod prikaz i ulaz signala
 button_game_pins = [15] # jedno dugme, button zauzima vec ss=16, sck=18, mosi=19!
 wire_pins = [17, 20, 21, 22, 26] # sta god ali 5
 #___________________________________Pomocne funkcije____________________________________________#
+topics = [b'katane/main_ready', b'katane/game_state', b'katane/game_over']
 def subscribe(topic, msg):
 	global run, main_ready, state, main_timer, spammer
 	if topic == b'katane/main_ready' and msg == b'1':
@@ -80,10 +81,12 @@ while not nic.isconnected():
     time.sleep(1)
 
 #___________________________________Game setup____________________________________________#
-mqtt_conn = MQTTClient(client_id='slavepico', server='broker.emqx.io',user='',password='',port=1883)
+broker='192.168.100.10'
+mqtt_conn = MQTTClient(client_id='slavepico', server='broker.emqx.io',user='',password='',port=1883, keepalive=300)
 mqtt_conn.set_callback(subscribe)
 mqtt_conn.connect()
-mqtt_conn.subscribe(b"katane/#")
+for t in topics:
+	mqtt_conn.subscribe(t)
 
 spammer = Timer(period=100, mode=Timer.PERIODIC, callback=spam)
 
@@ -105,7 +108,7 @@ moduli_pool = [SimonSays(state, simon_buttons, simon_leds),
 
 solved_moduli = []
 
-main_timer = Timer(period=100, mode=Timer.PERIODIC, callback=check)
+main_timer = Timer(period=500, mode=Timer.PERIODIC, callback=check)
 
 
 while run:
@@ -113,3 +116,7 @@ while run:
 	time.sleep(1)
 
 print('Game over!')
+for m in moduli_pool:
+	m.deinit()
+for m in solved_moduli:
+	m.deinit()
