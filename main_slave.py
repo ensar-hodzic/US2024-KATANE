@@ -120,3 +120,4 @@ for m in moduli_pool:
 	m.deinit()
 for m in solved_moduli:
 	m.deinit()
+mqtt_conn.disconnect()

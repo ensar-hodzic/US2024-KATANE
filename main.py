@@ -145,3 +145,5 @@ print('gg')
 
 for m in moduli:
 	m.deinit() 
+
+mqtt_conn.disconnect()
