@@ -103,7 +103,7 @@ print(nic.ifconfig())
 #___________________________________Game setup____________________________________________#
 
 broker='192.168.100.10'
-mqtt_conn = MQTTClient(client_id='nestonase', server='broker.emqx.io',user='',password='',port=1883, keepalive=300)
+mqtt_conn = MQTTClient(client_id='nestonase', server='broker.emqx.io',user='',password='',port=1883, keepalive=190)
 mqtt_conn.set_callback(subscribe)
 mqtt_conn.connect()
 for topic in topics:
