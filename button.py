@@ -1,7 +1,7 @@
 import max7219
 from machine import Pin, SPI, Timer
 
-#dio što će ići u main slave pica:
+
 spi = SPI(0, baudrate=10000000, sck=Pin(18), mosi=Pin(19))
 ss = Pin(16, Pin.OUT, Pin.PULL_DOWN)
 display = max7219.Matrix8x8(spi, ss, 1)
@@ -83,7 +83,7 @@ class Button:
 
         self.solved = False
         self.strikes = 0
-        self.buffer = ["kurac"]
+        self.buffer = ["init"]
         seed = seeds
         self.seed = seed
         button_defuse(seed, self.buffer)
@@ -96,7 +96,9 @@ class Button:
             self.solved = True
         elif self.buffer[-1] == 'boom':
             self.strikes += 1
-            button_defuse(self.seed, self.buffer) # opet
+            button_defuse(self.seed, self.buffer) # opet pokreni igru
 
     def get_strikes(self):
         return self.strikes
+    def deinit(self):
+        self.timer.deinit()

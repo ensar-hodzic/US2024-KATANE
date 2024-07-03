@@ -1,3 +1,4 @@
+import time
 from machine import Timer, Pin
 
 class MatricnaGame:
@@ -60,7 +61,7 @@ class MatricnaGame:
 
         self.generisiSifruMatricna(state)
 
-        self.timerMat=Timer(-1)  #TIMER ZA POTENCIOMETAR GAME
+        self.timerMat=Timer(-1) 
         self.timerMat.init(mode=Timer.PERIODIC, period=self.T, callback=self.postaviSifru) ##Igrati se sa period
 
     def solved(self):

@@ -42,15 +42,15 @@ class Decoder:
 
         self.display_timer = Timer(period=45, mode=Timer.PERIODIC, callback=self.display)
 
-        self.clock_wise.irq(self.handle1, Pin.IRQ_FALLING)
-        self.counter_clock.irq(self.handle2, Pin.IRQ_FALLING)
+        self.clock_wise.irq(self.handle_clockwise, Pin.IRQ_FALLING)
+        self.counter_clock.irq(self.handle_counterclock, Pin.IRQ_FALLING)
         self.press.irq(self.check, Pin.IRQ_FALLING)
     
-    def handle1(self,pin):
+    def handle_clockwise(self,pin):
         if (self.counter_clock.value() == 1):
             self.brojac += 1
 
-    def handle2(self, pin):
+    def handle_counterclock(self, pin):
         if (self.clock_wise.value() == 1):
             self.brojac -= 1
     
@@ -97,3 +97,6 @@ class Decoder:
 
     def get_strikes(self):
         return self.strikes
+    
+    def deinit(self):
+        self.display_timer.deinit()

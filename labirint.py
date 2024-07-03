@@ -42,7 +42,7 @@ class Labirint:
                 self.maze[i][j]=False
         self.display.display_matrix(self.maze)
         self.solved  = True
-        print("Svaka ti dala")
+        print("labirint rijesen")
 
     def prikaziIgraca(self, tim):
         self.maze[self.igracx][self.igracy] = not self.maze[self.igracx][self.igracy]
@@ -61,7 +61,7 @@ class Labirint:
             j = random.randint(0, i)
             directions[i], directions[j] = directions[j], directions[i]
 
-
+    # za potrebe testiranja 
     @staticmethod
     def generate_maze(): 
 

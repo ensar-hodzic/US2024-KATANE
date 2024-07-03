@@ -18,14 +18,15 @@ solved_slave = 0
 strike_slave = 0
 main_timer = Timer(-1)
 game_running = False
-
+MODULI_CNT = 5
+TIME = 0
 #___________________________________Pinouts_____________________________________________________#
 labirint_pins = [21,22,26,27] # tasteri labirinta lijevo, gore, dole, desno
 display_pins = [0, 18,19,16] # labirint display: spi, SCK, MOSI, CSm
 encoder_pins = [0,1,2] # jasno clk, dt, sw
-segmenti = [4,	5] #
-digits = [8,9,10,11,12,13,14] #
-rgb = [3,17,28]
+segmenti = [4,	5] #	odabir cifre na 7seg
+digits = [8,9,10,11,12,13,14] #	na 7 seg redom A,B,C,D,E,F,G
+rgb = [3,17,28]			# rgb pins redom R,B,G
 #___________________________________Pomocne funkcije____________________________________________#
 topics = [b'katane/slave_present', b'katane/app_present', b'katane/game_start', b'katane/slave_solved', b'katane/slave_strike']
 def subscribe(topic, msg):
@@ -63,27 +64,37 @@ def explode(t):
 
 def check(t):
 	global solved, strike, game_running
-	solved = 0
-	strike = 0
+	mqtt_conn.check_msg()
+	new_solved = solved_slave
+	new_strike = strike_slave
 	for m in moduli:
-		solved += m.solved
-		strike += m.get_strikes()
+		new_solved += m.solved
+		new_strike += m.get_strikes()
 		print("greske je dao", strike, m)
-	if strike + strike_slave > max_strike:
+	if new_strike > max_strike:
 		explode(t)
-		print("its  me hi")
-	elif solved + solved_slave == 5:
+		print("previse greski")
+	elif new_solved == MODULI_CNT:
 		count_down.deinit()
 		mqtt_conn.publish(b'katane/game_over', b'win')
 		main_timer.deinit()
 		print('ggwp')
 		game_running = False
-	mqtt_conn.publish(b'katane/strikes', str(strike + strike_slave).encode('ascii'))
-	mqtt_conn.publish(b'katane/solved', str(solved + solved_slave).encode('ascii'))
+	if new_strike != strike:
+		strike = new_strike
+		mqtt_conn.publish(b'katane/strikes', str(strike).encode('utf-8'))
+	if new_solved != solved:
+		solved = new_solved
+		mqtt_conn.publish(b'katane/solved', str(solved).encode('utf-8'))
 
 def publish_state(state, max_strike):
 	json = '{ "state": ' + str(state) + ',"max_strike": ' + str(max_strike) + ' }'
-	mqtt_conn.publish(b'katane/game_state', json.encode('ascii'), False, 1)
+	mqtt_conn.publish(b'katane/game_state', json.encode('utf-8'), False, 1)
+
+def publish_time(t):
+	global TIME 
+	mqtt_conn.publish(b'katane/time', str(TIME).encode('utf-8'))
+	TIME += 1
 
 #___________________________________Spajanje na Wifi____________________________________________#
 
@@ -103,11 +114,11 @@ print(nic.ifconfig())
 #___________________________________Game setup____________________________________________#
 
 broker='192.168.100.10'
-mqtt_conn = MQTTClient(client_id='nestonase', server='broker.emqx.io',user='',password='',port=1883, keepalive=190)
+mqtt_conn = MQTTClient(client_id='nestonase', server=broker,user='',password='',port=1883)
 mqtt_conn.set_callback(subscribe)
 mqtt_conn.connect()
 for topic in topics:
-	mqtt_conn.subscribe(topic)
+	mqtt_conn.subscribe(topic, 1)
 
 
 while not slave_present:
@@ -119,7 +130,7 @@ while not app_present:
 	print('cekam aplikaciju sa telefona da se javi')
 	mqtt_conn.wait_msg()
 
-mqtt_conn.publish(b'katane/main_ready', b'1') # javi telefonu da je main spreman da pocne
+mqtt_conn.publish(b'katane/main_ready', b'1') # javi telefonu i slaveu da je main spreman da pocne
 
 while not game_start:
 	mqtt_conn.wait_msg()
@@ -135,15 +146,19 @@ count_down = Timer(period=3 * 1000 * 60, mode=Timer.ONE_SHOT, callback=explode)
 
 moduli = [Labirint( labirint_pins, display_pins), Decoder(encoder_pins,  digits,segmenti, state)]
 main_timer.init(period=500, mode=Timer.PERIODIC, callback=check)
-
+clock_timer = Timer(period = 100, mode=Timer.PERIODIC, callback=publish_time)
 
 while game_running:
 	print('igra u toku...')
 	time.sleep(0.5)
-
+clock_timer.deinit()
 print('gg')
 
 for m in moduli:
 	m.deinit() 
 
 mqtt_conn.disconnect()
+
+
+import machine
+machine.reset()
