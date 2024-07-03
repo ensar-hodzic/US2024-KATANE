@@ -1,5 +1,7 @@
 from machine import Pin, ADC, Timer
 
+# IZBACENO IZ POSLJEDNJE PREDAJE :(
+
 class Potenciometar:
     potencimetar_values = [ 10, 30, 50, 20, 40, 60, 70, 0]
     T = 100

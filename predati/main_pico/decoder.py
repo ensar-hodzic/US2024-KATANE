@@ -26,7 +26,7 @@ class Decoder:
             [1,1,1,1,0,1,1]]
 
 
-    def __init__(self, encoder_pins, segmenti, digits,seed):
+    def __init__(self, encoder_pins:list, segmenti:list, digits:list,seed:int):
         self.clock_wise = Pin(encoder_pins[0], Pin.IN, Pin.PULL_UP)
         self.counter_clock = Pin(encoder_pins[1], Pin.IN, Pin.PULL_UP)
         self.press = Pin(encoder_pins[2], Pin.IN) 
@@ -42,42 +42,25 @@ class Decoder:
 
         self.display_timer = Timer(period=45, mode=Timer.PERIODIC, callback=self.display)
 
-        self.clkdb = time.ticks_ms()
-        self.swdb = time.ticks_ms()
-        self.btn = time.ticks_ms()
-
         self.clock_wise.irq(self.handle1, Pin.IRQ_RISING)
         self.counter_clock.irq(self.handle2, Pin.IRQ_RISING)
         self.press.irq(self.check, Pin.IRQ_RISING)
     
     def handle1(self,pin):
-        #if  time.ticks_ms() - self.clkdb < 100:
-         #   return
-        print('h1')
         if (self.counter_clock.value() == 1):
             self.brojac += 1
-        self.clkdb = time.ticks_ms()
 
     def handle2(self, pin):
-        #if  time.ticks_ms() - self.swdb < 100:
-         #   return    
-        
-        print('h2')
         if (self.clock_wise.value() == 1):
             self.brojac -= 1
-        self.swdb = time.ticks_ms()
     
     def check(self, pin):
-        print('h3')
-        #if  time.ticks_ms() - self.btn < 100:
-            #return
         if self.brojac != self.seed:
             self.strikes += 1
         else:
             self.press.irq(None, 0)  
             self.solved = True
             self.display_timer.deinit()  
-        self.btn = time.ticks_ms()
         self.brojac = 0
 
     def display_digit(self, n):

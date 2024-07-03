@@ -4,11 +4,9 @@ import network
 from umqtt.robust import MQTTClient
 import ujson
 from simonsays import SimonSays
-from morse import Morse
 from matricna import MatricnaGame
-from potenciometar import Potenciometar
 from button import Button
-from wirecutter import WireCutter
+
 
 #___________________________________Glob varijable______________________________________________#
 main_ready = False
@@ -17,6 +15,9 @@ strikes = 0
 solved = 0
 run = False
 main_timer = Timer(-1)
+network_name = "IME_MREZE"
+network_password = 'SIFRA_MREZE'
+SERVER='192.168.43.69' # mqtt broker
 #___________________________________Pinouts_____________________________________________________#
 
 simon_buttons = [8, 9, 10]
@@ -31,7 +32,6 @@ topics = [b'katane/main_ready',b'katane/game_state',b'katane/game_over']
 #___________________________________Pomocne funkcije____________________________________________#
 def subscribe(topic, msg):
 	global run, main_ready, state, main_timer, spammer
-	#print(topic.upper())
 	if topic == b'katane/main_ready' and msg == b'1':
 		main_ready = True
 		spammer.deinit()
@@ -53,9 +53,7 @@ def check(t):
 
 	for m in solved_moduli:
 		new_strikes += m.get_strikes()
-		#print(m)
 	for m in moduli_pool:
-		#print(m)
 		new_strikes += m.get_strikes()
 		if m.solved:
 			solved_moduli.append(m)
@@ -74,11 +72,8 @@ def check(t):
 
 def spam(t):
 	mqtt_conn.publish(b'katane/slave_present', b'1')
-	#print('main ziv sam!!!')
 #___________________________________Spajanje na Wifi____________________________________________#
 
-network_name = "LabUSProjekat"
-network_password = 'hastafor77'
 
 nic = network.WLAN(network.STA_IF)
 nic.active(True)
@@ -90,7 +85,7 @@ while not nic.isconnected():
 print("Spojeno")
 print(nic.ifconfig())
 #___________________________________Game setup____________________________________________#
-SERVER='192.168.43.69'
+
 mqtt_conn = MQTTClient(client_id='Pacacalave', server=SERVER,user='',password='',port=1883)
 
 mqtt_conn.set_callback(subscribe)
@@ -113,16 +108,13 @@ while not run:
 	mqtt_conn.wait_msg()
 	time.sleep(0.1)
 
-#persistance=Timer(period=200,mode = Timer.PERIODIC, callback=lambda t: mqtt_conn.publish(b'katane/nesto',b'a a a a stayin alive'))
+
 mqtt_conn.publish(b'katane/finalhandshake',b'1')
 spammer.deinit()
-#persistance=Timer(period=40,mode = Timer.PERIODIC, callback=lambda t: mqtt_conn.check_msg())
-print("why the fuck")
+
 
 moduli_pool = [SimonSays(simon_buttons, simon_leds),
 				MatricnaGame(state, pins_izlazna, pins_ulazna),
-				#Potenciometar(state, pin_potenciometar),
-				#Morse(state, morse_pins),
 				Button(state, button_game_pins)
                 ]
 

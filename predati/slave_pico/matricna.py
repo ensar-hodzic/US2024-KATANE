@@ -28,19 +28,15 @@ class MatricnaGame:
                     self.debounce=time.ticks_ms()
                     print(self.cifra[i][j])         
             self.izlazMatricna[i].value(0)
-        #print(self.korisnikSifra)
         print(self.sifraMatricna)
         if self.sifraMatricna==self.korisnikSifra and self.brojacMatricna==4:
-            print("BRAVO NO BOMBA KAPUT ON MATRCINA TASTATURA GAME")
             self.timerMat.deinit()
             self.korisnikSifra=[0,0,0,0]
             self.brojacMatricna=0
             self.debounce=0
-            #gameStart=False
             self.solved = True
             return
         if self.brojacMatricna==4:
-            print("POGRESNA SIFRA")
             self.brojacMatricna=0
             self.korisnikSifra=[0,0,0,0]
             self.br_gresaka += 1
@@ -62,7 +58,7 @@ class MatricnaGame:
 
         self.generisiSifruMatricna(state)
 
-        self.timerMat=Timer(-1)  #TIMER ZA POTENCIOMETAR GAME
+        self.timerMat=Timer(-1)  #TIMER
         self.timerMat.init(mode=Timer.PERIODIC, period=self.T, callback=self.postaviSifru) ##Igrati se sa period
 
     def solved(self):

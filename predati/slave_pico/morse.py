@@ -1,5 +1,8 @@
 from machine import ADC, Pin, Timer
 
+# IZBACENO IZ POSLJEDNJE PREDAJE :(
+# Strikes na modulu nije bilo jasno kako uraditi da igra bude zabavna.
+
 
 class Morse:
 	code_book = [('TVRD', 1500, 0.5), ('2024', 2500, 0.5), ('US24', 1000, 0.5),

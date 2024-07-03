@@ -1,19 +1,12 @@
 from machine import Pin,Timer
 import time
-import network
 from umqtt.robust import MQTTClient
 import ujson
 from labirint import Labirint
 from decoder import Decoder
 import random
-# Raspberry master
-
-# spoji se na internet
 import network
 import time
-from machine import Pin
-from umqtt.robust import MQTTClient
-import ujson
 import gc
 gc.enable()
 
@@ -30,6 +23,10 @@ game_running = False
 spam_slave = Timer(-1)
 TIME = 0
 MAX_TIME = 180
+MODULI_CNT = 5
+SERVER = '192.168.43.69' # broker
+network_name = "IME_MREZE"
+network_password = 'SIFRA_MREZE'
 #___________________________________Pinouts_____________________________________________________#
 labirint_pins = [27,26,22,21] # tasteri labirinta lijevo, gore, dole, desno
 display_pins = [0, 18,19,16] # labirint display: spi, SCK, MOSI, CSm
@@ -38,8 +35,8 @@ segmenti = [4,	5] # odabir cifre
 digits = [8,9,10,11,12,13,14] # segmenti na cifri
 rgb = [3,17,28]
 
-topics = [b'katane/slave_present' , b'katane/app_present', b'katane/game_start',b'katane/slave_solved', b'katane/finalhandshake',b'katane/slave_strike']
 #___________________________________Pomocne funkcije____________________________________________#
+topics = [b'katane/slave_present' , b'katane/app_present', b'katane/game_start',b'katane/slave_solved', b'katane/finalhandshake',b'katane/slave_strike']
 def subscribe(topic, msg):
 	global slave_present, app_present, game_running, game_start, strike_slave, solved_slave, spam_slave
 	print(topic.upper())
@@ -72,9 +69,7 @@ def rgb_randomiser():
 
 def explode(t):
 	global game_running, mqtt_conn, main_timer
-	print('usao')
 	mqtt_conn.publish(b'katane/game_over', b'BOOM')
-	print('izasao')
 	main_timer.deinit()
 	game_running = False
 
@@ -83,20 +78,17 @@ def check(t):
 	mqtt_conn.check_msg()
 	new_solved = solved_slave
 	new_strike = strike_slave
-	print('provjera')
 	for m in moduli:
 		new_solved += int(m.solved)
 		new_strike += m.get_strikes()
-		print("greske je dao", strike, m)
 	if new_strike > max_strike:
 		explode(t)
-		print("its  me hi")
-	elif new_solved  >= 5:
+		print("previse gresaka")
+	elif new_solved  == MODULI_CNT:
 		count_down.deinit()
 		print('pobjeda')
 		mqtt_conn.publish(b'katane/game_over', b'Bomba je deaktivirana')
 		main_timer.deinit()
-		print('ggwp')
 		game_running = False
 	if new_strike != strike:
 		strike = new_strike
@@ -119,9 +111,6 @@ def post_time(t):
 
 #___________________________________Spajanje na Wifi____________________________________________#
 
-network_name = "LabUSProjekat"
-network_password = 'hastafor77'
-
 nic = network.WLAN(network.STA_IF)
 nic.active(True)
 nic.connect(network_name, network_password)
@@ -136,16 +125,15 @@ print("spojeno")
 
 print(nic.ifconfig())
 #___________________________________Game setup____________________________________________#
-SERVER = '192.168.43.69'
+
 
 mqtt_conn = MQTTClient(client_id='2', server=SERVER,user='',password='',port=1883)
 
-#mqtt_conn.set_last_will(b'katane/game_over', b'aaaaa', retain=True)
 
 mqtt_conn.set_callback(subscribe)
 
 mqtt_conn.connect()
-print('jajajjaja')
+print('Uspjesno se nasao broker')
 
 
 for topic in topics:
@@ -174,8 +162,6 @@ state, max_strike = rgb_randomiser()
 publish_state(state, max_strike) # javi slaveu stanje, a telefonu broj dozvoljenih pokusaja
 
 
-#spam_slave = Timer(period=1000, mode=Timer.PERIODIC, callback=lambda t: publish_state(state, max_strike))
-
 count_down = Timer(period= MAX_TIME * 1000 , mode=Timer.ONE_SHOT, callback=explode)
 
 moduli = [Labirint( labirint_pins, display_pins,state),
@@ -185,14 +171,11 @@ cdtimer = Timer(period=1000, mode = Timer.PERIODIC, callback=post_time)
 while game_running:
 	print('igra u toku...')
 	time.sleep(0.5)
-	
-	
-print('opa')
-explode(1)
+
 
 for m in moduli:
     m.deinit()
     
 cdtimer.deinit() 
-#machine.reset()
+
 

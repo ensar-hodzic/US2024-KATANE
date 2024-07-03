@@ -51,7 +51,6 @@ class SimonSays:
                 prikazujGresku = Timer(period=250,mode = Timer.PERIODIC,callback = self.prikaziGresku)
         
     def button_handler(self,pin):
-        print("mame se jebu")
         if not self.showingSequence :
             current_time = time.ticks_ms()
             if time.ticks_diff(current_time, self.last_interrupt_time) > self.DEBOUNCE_TIME:

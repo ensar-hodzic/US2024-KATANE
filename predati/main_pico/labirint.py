@@ -42,7 +42,6 @@ class Labirint:
                 self.maze[i][j]=False
         self.display.display_matrix(self.maze)
         self.solved  = True
-        print("Svaka ti dala")
 
     def prikaziIgraca(self, tim):
         #print(gc.mem_free())
@@ -182,9 +181,7 @@ class Labirint:
             self.display.pixel(self.igracx,self.igracy,False)
             self.igracy+=1
             self.Provjeri()
-            #self.display.display_matrix(self.maze)
         else:
-            print("BONK")
             self.strikes += 1
 
     def Desno(self,irq):
@@ -195,9 +192,7 @@ class Labirint:
             self.display.pixel(self.igracx,self.igracy,False)
             self.igracx-=1
             self.Provjeri()
-            #self.display.display_matrix(self.maze)
         else:
-            print("BONK")
             self.strikes += 1
 
 
@@ -209,9 +204,7 @@ class Labirint:
             self.display.pixel(self.igracx,self.igracy,False)
             self.igracy-=1
             self.Provjeri()
-            #self.display.display_matrix(self.maze)
         else:
-            print("BONK")
             self.strikes += 1
 
     def Lijevo(self,irq):
@@ -221,10 +214,7 @@ class Labirint:
         if self.maze[self.igracx+1][self.igracy]==False:
             self.display.pixel(self.igracx,self.igracy,False)
             self.igracx+=1
-            self.Provjeri()
-            #self.display.display_matrix(self.maze)
         else:
-            print("BONK")
             self.strikes += 1
 
     def get_strikes(self):
