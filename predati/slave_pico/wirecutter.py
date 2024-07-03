@@ -1,5 +1,9 @@
 from machine import Pin, Timer
 
+
+# IZBACENO IZ POSLJEDNJE PREDAJE :(
+# Puno pinova za nezanimljivu igru
+
 class WireCutter:
     def __init__(self,outputs:list,inputs:list,valid_to_cut:list,inOrder:bool):
 

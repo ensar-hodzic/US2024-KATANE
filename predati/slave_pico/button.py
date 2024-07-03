@@ -1,7 +1,7 @@
 import max7219
 from machine import Pin, SPI, Timer
 
-#dio što će ići u main slave pica:
+# upamtiti na oba su spievi hardcodirani
 spi = SPI(0, baudrate=10000000, sck=Pin(18), mosi=Pin(19))
 ss = Pin(16, Pin.OUT, Pin.PULL_DOWN)
 display = max7219.Matrix8x8(spi, ss, 1)
@@ -38,7 +38,6 @@ def button_defuse(seed, result_buffer):
         time += 1
         if time%20 == 0:
             dots+=1
-        #dots %= 8
         display.pixel(list[seed][dots][0],list[seed][dots][1],1)
         print(seed)
         display.show()
@@ -46,20 +45,17 @@ def button_defuse(seed, result_buffer):
             display.fill(0)
             display.text('X',0,0,1)
             display.show()
-            print("boom")
             result_buffer[-1] = 'boom'
             timer.deinit()
         elif butval ==0 and seed+1==dots:
             display.fill(1)
             display.show()
-            print("gj")
             result_buffer[-1] = 'gj'
             timer.deinit()
         elif dots>=9:
             display.fill(0)
             display.text('X',0,0,1)
             display.show()
-            print("boom")
             result_buffer[-1] = 'boom'
             timer.deinit()
     result_buffer.append('running')
@@ -67,10 +63,9 @@ def button_defuse(seed, result_buffer):
 
 
 class Button:
-    #Halali ginger ali polimorfizam
     T = 100
     
-    def __init__(self, seeds, button_pin):
+    def __init__(self, seeds:int, button_pin:list):
         global button, time, dots, display, seed
         button = Pin(button_pin[0],Pin.IN, Pin.PULL_UP)
         time=0
@@ -95,7 +90,7 @@ class Button:
             self.solved = True
         elif self.buffer[-1] == 'boom':
             self.strikes += 1
-            button_defuse(self.seed, self.buffer) # opet
+            button_defuse(self.seed, self.buffer)
 
     def get_strikes(self):
         return self.strikes
